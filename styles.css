@@ -1,0 +1,17 @@
+button {
+  background-color:rgb(204, 222, 47);
+  width: 75px;
+  height: 75px;
+  margin: 1px;
+}
+
+.reset {
+  width: 113px;
+  height: 70px;
+  background-color: rgb(198, 200, 221);
+  font-size: 37px;
+}
+
+p {
+  font-size: 37px;
+}
