@@ -57,9 +57,9 @@ function checkWinner(cellColor) {
     for (let i = lineNo; i > 0 && haveWinner === 0; --i) {
         for (let j = 1; j < columnNo; ++j) {
             let currCellColor = document.getElementById(i * TEN + j).style.backgroundColor;
+            let nextCellColor = document.getElementById(i * TEN + j + 1).style.backgroundColor;
             if(currCellColor !== "rgb(185, 255, 127)") {
-                if (document.getElementById(i * TEN + j).style.backgroundColor === 
-                    document.getElementById(i * TEN + j + 1).style.backgroundColor) {
+                if (currCellColor === nextCellColor) {
                     ++idemColorCell;
                 } else {
                     idemColorCell = 1;
@@ -75,9 +75,9 @@ function checkWinner(cellColor) {
     for (let j = 1; j <= columnNo && haveWinner === 0; ++j) {
         for (let i = lineNo; i > 1; --i) {
             let currCellColor = document.getElementById(i * TEN + j).style.backgroundColor;
+            let nextCellColor = document.getElementById((i - 1) * TEN + j).style.backgroundColor;
             if(currCellColor !== "rgb(185, 255, 127)") {
-                if (document.getElementById(i * TEN + j).style.backgroundColor === 
-                    document.getElementById((i - 1) * TEN + j).style.backgroundColor) {
+                if (currCellColor === nextCellColor ) {
                     ++idemColorCell;
                 } else {
                     idemColorCell = 1;
@@ -102,9 +102,9 @@ function checkWinner(cellColor) {
         }
         for (let j1 = firstColumn, j2 = lastColumn; j1 < columnNo && line > 1 && haveWinner === 0; ++j1, --j2, --line) {
             let currCellColor1 = document.getElementById(line * TEN + j1).style.backgroundColor;
-            let nextCellColor1 = document.getElementById((line - 1) * TEN + (j1 + 1)).style.backgroundColor;
+            let nextCellColor1 = document.getElementById((line - 1) * TEN + j1 + 1).style.backgroundColor;
             let currCellColor2 = document.getElementById(line * TEN + j2).style.backgroundColor;
-            let nextCellColor2 = document.getElementById((line - 1) * TEN + (j2 - 1)).style.backgroundColor;
+            let nextCellColor2 = document.getElementById((line - 1) * TEN + j2 - 1).style.backgroundColor;
             if (currCellColor1 !== "rgb(185, 255, 127)") {
                 if(currCellColor1 === nextCellColor1) {
                     ++idemColorCell;
@@ -133,7 +133,7 @@ function cellStaining (pressPos, cellColor) {
     let cellId = parseInt(pressPos);
     let nextPosId = cellId + TEN;
     if (document.getElementById(nextPosId).style.backgroundColor !== "rgb(185, 255, 127)") {
-        document.getElementById(nextPosId - TEN).style.backgroundColor = cellColor;
+        document.getElementById(cellId).style.backgroundColor = cellColor;
     }
     while(nextPosId <= lastPos && document.getElementById(nextPosId).style.backgroundColor === "rgb(185, 255, 127)") {
         document.getElementById(nextPosId).style.backgroundColor = cellColor;
