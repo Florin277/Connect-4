@@ -9,9 +9,9 @@ const player2 = "blue";
 
 let haveWinner;
 let numberOfClicks;
-creatingGameBoard();
+createGameBoard();
 
-function creatingGameBoard() {
+function createGameBoard() {
     numberOfClicks = 1;
     haveWinner = 0;
     while (matrix.firstChild) {
@@ -23,7 +23,7 @@ function creatingGameBoard() {
             let currCell = matrix.appendChild(document.createElement("button"));
             currCell.id = i * TEN + j;
             currCell.style.backgroundColor = "rgb(185, 255, 127)";
-            document.getElementById(currCell.id).setAttribute("onclick", "cellReceivesColor(id)");
+            document.getElementById(currCell.id).setAttribute("onclick", "cellColorSetting(id)");
         }
         matrix.appendChild(document.createElement("br"));
     }  
@@ -34,19 +34,19 @@ function creatingGameBoard() {
     let button = matrix.appendChild(document.createElement("button"));
     button.id = "Reset";
     button.className = "reset";
-    document.getElementById("Reset").setAttribute("onclick", "creatingGameBoard()");
+    document.getElementById("Reset").setAttribute("onclick", "createGameBoard()");
     document.getElementById("Reset").innerHTML = "Reset";
 }
 let cellColor;
 
-function cellReceivesColor(pressPos) {
+function cellColorSetting(pressPos) {
     if (haveWinner === 0) {
         if (numberOfClicks % 2) {
             cellColor = player1;
         } else {
             cellColor = player2;
         }
-        cellStaining(pressPos, cellColor);
+        colorCellsColumn(pressPos, cellColor);
         if (numberOfClicks >= startCheck) {
             checkWinner();
         }
@@ -54,59 +54,52 @@ function cellReceivesColor(pressPos) {
     }
 }
 
-function checkWinner() {
-    if (checkRows() || checkColumns() || checkDiagonals()) {
-        printMessage(cellColor);
+function checkWinner() { 
+    if (checkWinningRowsAndColumns() || checkWinningDiagonals()) {
+        displayWinningMessage(cellColor);
     }
 }
 
-function checkRows() {
+function checkWinningRowsAndColumns() {
     let idemColorCell = 1;
-    for (let i = lineNo; i > 0 && haveWinner === 0; --i) {
-        for (let j = 1; j < columnNo; ++j) {
-            let currCellColor = document.getElementById(i * TEN + j).style.backgroundColor;
-            let nextCellColor = document.getElementById(i * TEN + j + 1).style.backgroundColor;
-            if(currCellColor !== "rgb(185, 255, 127)") {
-                if (currCellColor === nextCellColor) {
-                    ++idemColorCell;
+    let row = lineNo;
+    let col = columnNo;
+    for (let n = 1; n <= 2; ++n) {
+        if (n === 2) {
+            let aux = col;
+            col = row;
+            row = aux;
+        }
+        for (let i = row; i > 0 && haveWinner === 0; --i) {
+            for (let j = 1; j < col; ++j) {
+                let currCellColor;
+                let nextCellColor;
+                if (n === 1) {
+                    currCellColor = document.getElementById(i * TEN + j).style.backgroundColor;
+                    nextCellColor = document.getElementById(i * TEN + j + 1).style.backgroundColor;
                 } else {
-                    idemColorCell = 1;
+                    currCellColor = document.getElementById(j * TEN + i).style.backgroundColor;
+                    nextCellColor = document.getElementById((j + 1) * TEN + i).style.backgroundColor;
                 }
-                if (idemColorCell === 4) {   
-                    haveWinner = 1;
-                    break;
+                if(currCellColor !== "rgb(185, 255, 127)") {
+                    if (currCellColor === nextCellColor) {
+                        ++idemColorCell;
+                    } else {
+                        idemColorCell = 1;
+                    }
+                    if (idemColorCell === 4) {   
+                        haveWinner = 1;
+                        break;
+                    }
                 }
             }
+            idemColorCell = 1;
         }
-        idemColorCell = 1;
     }
     return haveWinner;
 }
 
-function checkColumns() {
-    let idemColorCell = 1;
-    for (let j = 1; j <= columnNo && haveWinner === 0; ++j) {
-        for (let i = lineNo; i > 1; --i) {
-            let currCellColor = document.getElementById(i * TEN + j).style.backgroundColor;
-            let nextCellColor = document.getElementById((i - 1) * TEN + j).style.backgroundColor;
-            if(currCellColor !== "rgb(185, 255, 127)") {
-                if (currCellColor === nextCellColor ) {
-                    ++idemColorCell;
-                } else {
-                    idemColorCell = 1;
-                }
-                if (idemColorCell === 4) {
-                    haveWinner = 1;
-                    break;
-                }
-            }
-        }
-        idemColorCell = 1;
-    }
-    return haveWinner;
-}
-
-function checkDiagonals() {
+function checkWinningDiagonals() {
     let idemColorCell = 1;
     let idemColorCell2 = 1;
     let firstColumn = 1;
@@ -148,21 +141,23 @@ function checkDiagonals() {
     return haveWinner;
 }
 
-function cellStaining (pressPos, cellColor) {
+const TEN_SECONDS_MS = 10;
+
+function colorCellsColumn (pressPos, cellColor) {//inerHtml
     let cellId = parseInt(pressPos);
-    let nextPosId = cellId + TEN;
-    if (document.getElementById(nextPosId).style.backgroundColor !== "rgb(185, 255, 127)") {
+    let nextCellId = cellId + TEN;
+    if (document.getElementById(nextCellId).style.backgroundColor !== "rgb(185, 255, 127)") {
         document.getElementById(cellId).style.backgroundColor = cellColor;
     }
-    while(nextPosId <= lastPos && document.getElementById(nextPosId).style.backgroundColor === "rgb(185, 255, 127)") {
-        document.getElementById(nextPosId).style.backgroundColor = cellColor;
+    while(nextCellId <= lastPos && document.getElementById(nextCellId).style.backgroundColor === "rgb(185, 255, 127)") {
+        document.getElementById(nextCellId).style.backgroundColor = cellColor;
         document.getElementById(cellId).style.backgroundColor = "rgb(185, 255, 127)";
-        nextPosId += TEN;
+        nextCellId += TEN;
         cellId += TEN;
-    }  
+    }    
 }     
 
-function printMessage(cellColor) {
+function displayWinningMessage(cellColor) {
     document.getElementById("Message").style.color = cellColor;
     document.getElementById("Message").innerHTML = "Winner color " + cellColor;
 }
