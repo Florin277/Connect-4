@@ -4,6 +4,8 @@ const lineNo = 6;
 const startCheck = 7; 
 const TEN = 10;
 const lastPos = 67;
+const PosLineAndColumns = 35;
+const PosDiagonals = 24;
 const player1 = "red";
 const player2 = "blue";
 
@@ -55,88 +57,78 @@ function cellColorSetting(pressPos) {
 }
 
 function checkWinner() { 
-    if (checkWinningRowsAndColumns() || checkWinningDiagonals()) {
+    if (checkWinningRowsColumnsDiagonals(1, 1, 0, 1) ||
+        checkWinningRowsColumnsDiagonals(1, 1, 1, 0) ||
+        checkWinningRowsColumnsDiagonals(1, 4, 1, 1) ||
+        checkWinningRowsColumnsDiagonals(1, 4, 1, -1)) {
         displayWinningMessage(cellColor);
     }
 }
 
-function checkWinningRowsAndColumns() {
+function checkWinningRowsColumnsDiagonals(currLine, currColumn, incrementLine, incrementColumn) {
     let idemColorCell = 1;
-    let row = lineNo;
-    let col = columnNo;
-    for (let n = 1; n <= 2; ++n) {
-        if (n === 2) {
-            let aux = col;
-            col = row;
-            row = aux;
-        }
-        for (let i = row; i > 0 && haveWinner === 0; --i) {
-            for (let j = 1; j < col; ++j) {
-                let currCellColor;
-                let nextCellColor;
-                if (n === 1) {
-                    currCellColor = document.getElementById(i * TEN + j).style.backgroundColor;
-                    nextCellColor = document.getElementById(i * TEN + j + 1).style.backgroundColor;
-                } else {
-                    currCellColor = document.getElementById(j * TEN + i).style.backgroundColor;
-                    nextCellColor = document.getElementById((j + 1) * TEN + i).style.backgroundColor;
-                }
-                if(currCellColor !== "rgb(185, 255, 127)") {
-                    if (currCellColor === nextCellColor) {
-                        ++idemColorCell;
-                    } else {
-                        idemColorCell = 1;
-                    }
-                    if (idemColorCell === 4) {   
-                        haveWinner = 1;
-                        break;
-                    }
-                }
-            }
-            idemColorCell = 1;
-        }
+    let nextLine = 1;
+    let nextColumn = 1;
+    let copyCurrColumn = currColumn;
+    let realPosLineAndColumn = PosLineAndColumns + incrementColumn;
+    if (currColumn > 1) {
+        realPosLineAndColumn = PosDiagonals;
     }
-    return haveWinner;
-}
-
-function checkWinningDiagonals() {
-    let idemColorCell = 1;
-    let idemColorCell2 = 1;
-    let firstColumn = 1;
-    let lastColumn = columnNo;
-    for (let i = 1; i <= lineNo && haveWinner === 0; ++i) {
-        let line = 3 + i;
-        if (line > lineNo) {
-            line = lineNo;
-            ++firstColumn;
-            --lastColumn;
-        }
-        for (let j1 = firstColumn, j2 = lastColumn; j1 < columnNo && line > 1; ++j1, --j2, --line) {
-            let currCellColor1 = document.getElementById(line * TEN + j1).style.backgroundColor;
-            let nextCellColor1 = document.getElementById((line - 1) * TEN + j1 + 1).style.backgroundColor;
-            let currCellColor2 = document.getElementById(line * TEN + j2).style.backgroundColor;
-            let nextCellColor2 = document.getElementById((line - 1) * TEN + j2 - 1).style.backgroundColor;
-            if (currCellColor1 !== "rgb(185, 255, 127)") {
-                if(currCellColor1 === nextCellColor1) {
-                    ++idemColorCell;
-                } else {
+    for (let i = 1; i <= realPosLineAndColumn; ++i) {
+        let currCellColor = document.getElementById(currLine * TEN + currColumn).style.backgroundColor;
+        let nextCellColor = document.getElementById((currLine + incrementLine) * TEN + currColumn + incrementColumn).style.backgroundColor;
+        if(currCellColor !== "rgb(185, 255, 127)") {
+            if (currCellColor === nextCellColor) {
+                ++idemColorCell;
+            } else {
+                idemColorCell = 1;
+            }
+            if (idemColorCell === 4) {
+                haveWinner = 1;
+                break; 
+            }
+        }    
+        currLine += incrementLine;
+        currColumn += incrementColumn;
+        if (copyCurrColumn === 1) {
+            if (currColumn > columnNo - incrementColumn) {
+                ++nextLine;
+                currLine = nextLine;
+                currColumn = 1;
+                idemColorCell = 1;
+            } else if (currLine > lineNo - incrementLine) {
+                ++nextColumn;
+                currLine = 1;
+                currColumn = nextColumn;
+                idemColorCell = 1;
+            }
+        } else {
+            if (incrementColumn > 0) {
+                if (currColumn > columnNo - 1) {
+                    currLine = 1;
+                    currColumn = 4 - nextColumn;
+                    ++nextColumn;
+                    idemColorCell = 1;
+                } else if (currLine < 1 || currLine > lineNo - 1) {
+                    ++nextLine;
+                    currLine = nextLine;
+                    currColumn = 1;
+                    idemColorCell = 1;
+                }    
+            } else {
+                if (currColumn < 2) {
+                    currLine = 1;
+                    currColumn = 4 + nextColumn;
+                    ++nextColumn;
+                    idemColorCell = 1;
+                } else if (currLine > lineNo - 1) {
+                    ++nextLine;
+                    currLine = nextLine;
+                    currColumn = columnNo;
                     idemColorCell = 1;
                 }
-            }    
-            if (currCellColor2 !== "rgb(185, 255, 127)") {
-                if(currCellColor2 === nextCellColor2) {
-                    ++idemColorCell2;
-                } else {
-                    idemColorCell2 = 1;
-                }
-            } 
-            if (idemColorCell === 4 || idemColorCell2 === 4) {
-                haveWinner = 1;
-                break;
             }
-        }  
-        idemColorCell = 1;  
-        idemColorCell2 = 1;
+        }   
     }
     return haveWinner;
 }
