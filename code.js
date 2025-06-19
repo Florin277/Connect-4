@@ -5,9 +5,10 @@ const startCheck = 7;
 const TEN = 10;
 const lastPos = 67;
 const PosLineAndColumns = 35;
-const PosDiagonals = 24;
+const PosDiagonals = 26;
 const player1 = "red";
 const player2 = "blue";
+const colorGameBoard = "rgb(185, 255, 127)";
 
 let haveWinner;
 let numberOfClicks;
@@ -24,7 +25,7 @@ function createGameBoard() {
         for (let j = 1; j <= columnNo; ++j) {
             let currCell = matrix.appendChild(document.createElement("button"));
             currCell.id = i * TEN + j;
-            currCell.style.backgroundColor = "rgb(185, 255, 127)";
+            currCell.style.backgroundColor = colorGameBoard;
             document.getElementById(currCell.id).setAttribute("onclick", "cellColorSetting(id)");
         }
         matrix.appendChild(document.createElement("br"));
@@ -57,19 +58,25 @@ function cellColorSetting(pressPos) {
 }
 
 function checkWinner() { 
-    if (checkWinningRowsColumnsDiagonals(1, 1, 0, 1) ||
-        checkWinningRowsColumnsDiagonals(1, 1, 1, 0) ||
-        checkWinningRowsColumnsDiagonals(1, 4, 1, 1) ||
-        checkWinningRowsColumnsDiagonals(1, 4, 1, -1)) {
+    if (checkingColorsConsecutiveCells(1, 1, 0, 1) ||
+        checkingColorsConsecutiveCells(1, 1, 1, 0) ||
+        checkingColorsConsecutiveCells(1, 4, 1, 1) ||
+        checkingColorsConsecutiveCells(1, 4, 1, -1)) {
         displayWinningMessage(cellColor);
     }
 }
 
-function checkWinningRowsColumnsDiagonals(currLine, currColumn, incrementLine, incrementColumn) {
+function isOutSide(line, column) {
+    if (line > lineNo || line < 1 || column > columnNo || column < 1) {
+        return 1;
+    }
+    return 0;
+}
+
+function checkingColorsConsecutiveCells(currLine, currColumn, incrementLine, incrementColumn) {
     let idemColorCell = 1;
-    let nextLine = 1;
-    let nextColumn = 1;
     let copyCurrColumn = currColumn;
+    let copyCurrLine = currLine;
     let realPosLineAndColumn = PosLineAndColumns + incrementColumn;
     if (currColumn > 1) {
         realPosLineAndColumn = PosDiagonals;
@@ -77,7 +84,7 @@ function checkWinningRowsColumnsDiagonals(currLine, currColumn, incrementLine, i
     for (let i = 1; i <= realPosLineAndColumn; ++i) {
         let currCellColor = document.getElementById(currLine * TEN + currColumn).style.backgroundColor;
         let nextCellColor = document.getElementById((currLine + incrementLine) * TEN + currColumn + incrementColumn).style.backgroundColor;
-        if(currCellColor !== "rgb(185, 255, 127)") {
+        if(currCellColor !== colorGameBoard) {
             if (currCellColor === nextCellColor) {
                 ++idemColorCell;
             } else {
@@ -90,45 +97,23 @@ function checkWinningRowsColumnsDiagonals(currLine, currColumn, incrementLine, i
         }    
         currLine += incrementLine;
         currColumn += incrementColumn;
-        if (copyCurrColumn === 1) {
-            if (currColumn > columnNo - incrementColumn) {
-                ++nextLine;
-                currLine = nextLine;
-                currColumn = 1;
-                idemColorCell = 1;
-            } else if (currLine > lineNo - incrementLine) {
-                ++nextColumn;
+        if (isOutSide(currLine + incrementLine, currColumn + incrementColumn)) {
+            if (incrementLine == 0 || incrementColumn == 0) {
+                currLine = copyCurrLine + incrementColumn;
+                currColumn = copyCurrColumn + incrementLine
+                copyCurrLine = currLine;
+                copyCurrColumn = currColumn;
+            } else if (currColumn > columnNo - 1 || currColumn < 2) {
                 currLine = 1;
-                currColumn = nextColumn;
-                idemColorCell = 1;
+                currColumn = copyCurrColumn - incrementColumn;
+                copyCurrColumn = currColumn;
+            } else if (currLine > lineNo - 1) {
+                currLine = copyCurrLine + incrementLine;
+                currColumn = copyCurrColumn;
+                ++copyCurrLine;
             }
-        } else {
-            if (incrementColumn > 0) {
-                if (currColumn > columnNo - 1) {
-                    currLine = 1;
-                    currColumn = 4 - nextColumn;
-                    ++nextColumn;
-                    idemColorCell = 1;
-                } else if (currLine < 1 || currLine > lineNo - 1) {
-                    ++nextLine;
-                    currLine = nextLine;
-                    currColumn = 1;
-                    idemColorCell = 1;
-                }    
-            } else {
-                if (currColumn < 2) {
-                    currLine = 1;
-                    currColumn = 4 + nextColumn;
-                    ++nextColumn;
-                    idemColorCell = 1;
-                } else if (currLine > lineNo - 1) {
-                    ++nextLine;
-                    currLine = nextLine;
-                    currColumn = columnNo;
-                    idemColorCell = 1;
-                }
-            }
-        }   
+            idemColorCell = 1;
+        }
     }
     return haveWinner;
 }
@@ -136,12 +121,12 @@ function checkWinningRowsColumnsDiagonals(currLine, currColumn, incrementLine, i
 function colorCellsColumn (pressPos, cellColor) {
     let cellId = parseInt(pressPos);
     let nextCellId = cellId + TEN;
-    if (document.getElementById(nextCellId).style.backgroundColor !== "rgb(185, 255, 127)") {
+    if (document.getElementById(nextCellId).style.backgroundColor !== colorGameBoard) {
         document.getElementById(cellId).style.backgroundColor = cellColor;
     }
-    while(nextCellId <= lastPos && document.getElementById(nextCellId).style.backgroundColor === "rgb(185, 255, 127)") {
+    while(nextCellId <= lastPos && document.getElementById(nextCellId).style.backgroundColor === colorGameBoard) {
         document.getElementById(nextCellId).style.backgroundColor = cellColor;
-        document.getElementById(cellId).style.backgroundColor = "rgb(185, 255, 127)";
+        document.getElementById(cellId).style.backgroundColor = colorGameBoard;
         nextCellId += TEN;
         cellId += TEN;
     }    
