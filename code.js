@@ -1,11 +1,9 @@
 const matrix = document.getElementById("matrix");
 const columnNo = 7;
 const lineNo = 6;
+const lastPos = 67;
 const startCheck = 7; 
 const TEN = 10;
-const lastPos = 67;
-const PosLineAndColumns = 35;
-const PosDiagonals = 26;
 const player1 = "red";
 const player2 = "blue";
 const colorGameBoard = "rgb(185, 255, 127)";
@@ -58,64 +56,35 @@ function cellColorSetting(pressPos) {
 }
 
 function checkWinner() { 
-    if (checkingColorsConsecutiveCells(1, 1, 0, 1) ||
-        checkingColorsConsecutiveCells(1, 1, 1, 0) ||
-        checkingColorsConsecutiveCells(1, 4, 1, 1) ||
-        checkingColorsConsecutiveCells(1, 4, 1, -1)) {
+    if (checkingColorsConsecutiveCells(0, 1) ||
+        checkingColorsConsecutiveCells(1, 0) ||
+        checkingColorsConsecutiveCells(1, 1) ||
+        checkingColorsConsecutiveCells(1, -1)) {
         displayWinningMessage(cellColor);
+        haveWinner = 1;
     }
 }
 
-function isOutSide(line, column) {
-    if (line > lineNo || line < 1 || column > columnNo || column < 1) {
-        return 1;
-    }
-    return 0;
+function isInside(line, column) {
+    return line <= lineNo && line >= 1 && column <= columnNo && column >= 1;
 }
 
-function checkingColorsConsecutiveCells(currLine, currColumn, incrementLine, incrementColumn) {
-    let idemColorCell = 1;
-    let copyCurrColumn = currColumn;
-    let copyCurrLine = currLine;
-    let realPosLineAndColumn = PosLineAndColumns + incrementColumn;
-    if (currColumn > 1) {
-        realPosLineAndColumn = PosDiagonals;
-    }
-    for (let i = 1; i <= realPosLineAndColumn; ++i) {
-        let currCellColor = document.getElementById(currLine * TEN + currColumn).style.backgroundColor;
-        let nextCellColor = document.getElementById((currLine + incrementLine) * TEN + currColumn + incrementColumn).style.backgroundColor;
-        if(currCellColor !== colorGameBoard) {
-            if (currCellColor === nextCellColor) {
-                ++idemColorCell;
-            } else {
-                idemColorCell = 1;
-            }
-            if (idemColorCell === 4) {
-                haveWinner = 1;
-                break; 
-            }
-        }    
-        currLine += incrementLine;
-        currColumn += incrementColumn;
-        if (isOutSide(currLine + incrementLine, currColumn + incrementColumn)) {
-            if (incrementLine == 0 || incrementColumn == 0) {
-                currLine = copyCurrLine + incrementColumn;
-                currColumn = copyCurrColumn + incrementLine
-                copyCurrLine = currLine;
-                copyCurrColumn = currColumn;
-            } else if (currColumn > columnNo - 1 || currColumn < 2) {
-                currLine = 1;
-                currColumn = copyCurrColumn - incrementColumn;
-                copyCurrColumn = currColumn;
-            } else if (currLine > lineNo - 1) {
-                currLine = copyCurrLine + incrementLine;
-                currColumn = copyCurrColumn;
-                ++copyCurrLine;
-            }
-            idemColorCell = 1;
+function checkingColorsConsecutiveCells(incrementLine, incrementColumn) {
+    for (let i = 1; i <= lineNo; ++i) {
+        for (let j = 1; j <= columnNo; ++j) {
+            if (isInside(i + incrementLine * 3, j + incrementColumn * 3)) {
+                let currCellColor = document.getElementById(i * TEN + j).style.backgroundColor;
+                let next1CellColor = document.getElementById((i + incrementLine) * TEN + (j + incrementColumn)).style.backgroundColor;
+                let next2CellColor = document.getElementById((i + incrementLine * 2) * TEN + (j + incrementColumn * 2)).style.backgroundColor;
+                let next3CellColor = document.getElementById((i + incrementLine * 3) * TEN + (j + incrementColumn * 3)).style.backgroundColor;
+                if (currCellColor !== colorGameBoard && currCellColor === next1CellColor &&
+                    currCellColor === next2CellColor && currCellColor === next3CellColor) {
+                    return 1;
+                }
+            }    
         }
-    }
-    return haveWinner;
+    }    
+    return 0;
 }
 
 function colorCellsColumn (pressPos, cellColor) {
